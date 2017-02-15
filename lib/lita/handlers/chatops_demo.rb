@@ -18,7 +18,7 @@ module Lita
       end
 
       def receive(request, response)
-        data = GitlabHelper.parse_data(request)
+        data = parse_data(request)
 
         send_attachment_to_room(
           data[:object_attributes][:channel],
@@ -32,6 +32,15 @@ module Lita
       end
 
       private
+
+      def parse_data(request)
+        data = MultiJson.load(request.body.string, symbolize_keys: true)
+        data[:project] = request.params['project']
+        data
+      rescue MultiJson::LoadError => e
+        Lita.logger.error("Could not parse JSON payload: #{e.message}")
+        return
+      end
 
       def start_jenkins_job_with_artifact_version(job_name, artifact_version, response)
         jenkins_client.job.build(job_name, 'build_version' => artifact_version, 'triggered_by' => response.user.metadata['mention_name'])
