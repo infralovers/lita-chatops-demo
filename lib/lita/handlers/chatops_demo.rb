@@ -11,6 +11,7 @@ module Lita
       route(/^deploy (\w+)\s+(.+)$/,
             :handle_deploy!,
             command: true,
+            restrict_to: [:deployment],
             help: { '`deploy <application> <version>`' => '*applications*: frontend, backend' })
 
       def handle_deploy!(response)
